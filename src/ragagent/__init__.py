@@ -1,2 +1,8 @@
-def main() -> None:
-    print("Hello from ragagent!")
+from src.api.app import app
+
+
+def main():
+    return app
+
+
+__all__ = ["app", "main"]
