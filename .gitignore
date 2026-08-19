@@ -1,30 +1,45 @@
-# Python缓存
+# Python
 __pycache__/
 *.py[cod]
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
-# 虚拟环境
-venv/
+# Virtual environments
 .venv/
+venv/
 env/
 
-# 环境变量
+# Environment variables and local secrets
 .env
+.env.local
+
+# Runtime data
+logs/
+*.log
+chroma_db/
+md5.text
+data/uploads/*
+!data/uploads/.gitkeep
+
+# Local paper corpus
+data/**/*.pdf
+data/**/*.PDF
+data/**/*.txt
+!data/.gitkeep
+!data/papers/.gitkeep
+!data/uploads/.gitkeep
+
+# Frontend
+front/node_modules/
+front/dist/
+front/*.tsbuildinfo
 
 # IDE
 .vscode/
 .idea/
 
-# 日志
-*.log
-logs/
-
-# 测试缓存
-.pytest_cache/
-
-# 模型文件
-*.bin
-*.pt
-*.pth
-
-# 临时文件
+# Temporary files
 *.tmp
+*.bak
