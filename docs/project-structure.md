@@ -10,7 +10,7 @@ RAGAgent/
   src/
     api/                   # FastAPI routes and DTO schemas
     RAG/                   # Paper ingestion, vector store, RAG service
-    agent/                 # Agent-side tool wrappers
+    agent/                 # Agent and research tools
     config/                # Environment-backed configuration
     model/                 # LLM client construction
     utils/                 # File, path, prompt helpers
@@ -27,3 +27,5 @@ RAGAgent/
 ```
 
 The backend and frontend are intentionally separated. FastAPI exposes API endpoints only; Vite serves the frontend and proxies `/api/*` requests to FastAPI during development.
+
+See docs/architecture.md for the intended module boundaries and refactor roadmap.

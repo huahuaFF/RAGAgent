@@ -10,6 +10,9 @@ from fastapi.responses import StreamingResponse
 
 from src.RAG.ragService import RagService
 from src.RAG.vectorStoreService import VectorStoreService
+from src.agent.react_agent import MainAgent
+from src.agent.tools.middleware import AgentBudgetExceeded
+from src.agent.tools.rag_tool import clear_rag_tool_cache
 from src.api.schemas import (
     ChatRequest,
     ChatResponse,
@@ -50,8 +53,28 @@ def get_rag_service() -> RagService:
     return RagService(get_vector_store())
 
 
+@lru_cache(maxsize=1)
+def get_agent() -> MainAgent:
+    return MainAgent()
+
+
 def refresh_rag_service() -> None:
     get_rag_service.cache_clear()
+    get_agent.cache_clear()
+    clear_rag_tool_cache()
+
+
+def format_runtime_error(exc: Exception) -> str:
+    message = str(exc)
+    if isinstance(exc, AgentBudgetExceeded):
+        return "Agent tool budget exceeded. This turn was stopped to prevent repeated tool calls and token waste. Please narrow the request or choose one candidate explicitly."
+    if "Insufficient Balance" in message or "Error code: 402" in message:
+        return (
+            "Model provider balance is insufficient. The Agent must call the chat model "
+            "before it can decide which tool to use. Check the account balance for "
+            "DEEPSEEK_API_KEY or switch to an available model."
+        )
+    return message
 
 
 def safe_uploaded_name(filename: str) -> str:
@@ -112,9 +135,9 @@ def import_knowledge(request: ImportRequest) -> ImportResponse:
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest) -> ChatResponse:
     try:
-        answer = get_rag_service().rag_summarize(request.query)
+        answer = get_agent().execute(request.query, request.session_id)
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        raise HTTPException(status_code=500, detail=format_runtime_error(exc)) from exc
     return ChatResponse(answer=answer)
 
 
@@ -122,9 +145,29 @@ def chat(request: ChatRequest) -> ChatResponse:
 def chat_stream(request: ChatRequest):
     def generate():
         try:
+            yield from get_agent().execute_stream(request.query, request.session_id)
+        except Exception as exc:
+            yield f"\n[ERROR] {format_runtime_error(exc)}"
+
+    return StreamingResponse(generate(), media_type="text/plain; charset=utf-8")
+
+
+@app.post("/rag/chat", response_model=ChatResponse)
+def rag_chat(request: ChatRequest) -> ChatResponse:
+    try:
+        answer = get_rag_service().rag_summarize(request.query)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=format_runtime_error(exc)) from exc
+    return ChatResponse(answer=answer)
+
+
+@app.post("/rag/chat/stream")
+def rag_chat_stream(request: ChatRequest):
+    def generate():
+        try:
             yield from get_rag_service().rag_summarize_stream(request.query)
         except Exception as exc:
-            yield f"\n[ERROR] {exc}"
+            yield f"\n[ERROR] {format_runtime_error(exc)}"
 
     return StreamingResponse(generate(), media_type="text/plain; charset=utf-8")
 

@@ -61,7 +61,7 @@ class ChatModelInfo:
     temperature: float = 0
     max_tokens: Optional[int] = None
     timeout: Optional[float] = None
-    max_retries: int = 2
+    max_retries: int = 0
 
 
 @dataclass
@@ -99,14 +99,14 @@ class Configer:
         self.agentInfo = self.loadAgentInfo()
 
     def loadChatModelInfo(self) -> ChatModelInfo:
-        max_tokens = _get_str_or_none("MAX_TOKENS")
+        max_tokens = _getenv("MAX_TOKENS", "1200")
         return ChatModelInfo(
             model_name=_getenv("DEEPSEEK_MODEL_NAME", "deepseek-chat"),
             api_key=_getenv("DEEPSEEK_API_KEY"),
             temperature=float(_getenv("TEMPERATURE", "0")),
-            max_tokens=None if max_tokens is None else int(max_tokens),
+            max_tokens=None if max_tokens is None or max_tokens.lower() == "none" else int(max_tokens),
             timeout=_get_float_or_none("TIMEOUT"),
-            max_retries=_get_int("MAX_RETRIES", 2),
+            max_retries=_get_int("MAX_RETRIES", 0),
         )
 
     def loadVectorStoreServiceInfo(self) -> VectorStoreServiceInfo:

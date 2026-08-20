@@ -32,6 +32,7 @@ class ImportResponse(BaseModel):
 
 class ChatRequest(BaseModel):
     query: str = Field(min_length=1)
+    session_id: str = Field(default="default", min_length=1, max_length=128)
 
 
 class ChatResponse(BaseModel):

@@ -22,6 +22,7 @@ export default function App() {
   const [previewing, setPreviewing] = useState(false);
   const [preview, setPreview] = useState<PreviewResult[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const sessionIdRef = useRef(crypto.randomUUID());
 
   const selectedFiles = useMemo(
     () => files.filter((file) => selected.has(file.path)),
@@ -118,7 +119,7 @@ export default function App() {
       const response = await fetch(`${API_BASE}/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: trimmed }),
+        body: JSON.stringify({ query: trimmed, session_id: sessionIdRef.current }),
       });
       if (!response.ok || !response.body) {
         throw new Error(`${response.status} ${response.statusText}`);
