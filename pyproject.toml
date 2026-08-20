@@ -17,6 +17,7 @@ dependencies = [
     "langchain-deepseek>=1.1.0",
     "pypdf>=6.1.1",
     "pymupdf>=1.26.0",
+    "arxiv<3",
 ]
 
 [project.scripts]

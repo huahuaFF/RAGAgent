@@ -28,7 +28,7 @@ export function ChatPanel({
       <div className="panel-header">
         <div>
           <h2>Paper QA</h2>
-          <p>{selectedCount} selected · {uploadedCount} uploaded</p>
+          <p>{selectedCount} selected / {uploadedCount} uploaded</p>
         </div>
         <button className="button secondary" onClick={onClear}>Clear</button>
       </div>
