@@ -21,9 +21,5 @@ def load_rag_prompts() -> str:
     return _load_prompt(configer.getPromptInfo().rag_prompt_path, "load_rag_prompts")
 
 
-def load_report_prompts() -> str:
-    return _load_prompt(configer.getPromptInfo().report_prompt_path, "load_report_prompts")
-
-
 if __name__ == "__main__":
-    print(load_report_prompts())
+    print(load_system_prompts())

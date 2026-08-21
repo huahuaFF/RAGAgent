@@ -4,14 +4,13 @@ import json
 from typing import Callable
 
 from langchain.agents import AgentState
-from langchain.agents.middleware import ModelRequest, before_model, dynamic_prompt, wrap_tool_call
+from langchain.agents.middleware import before_model, wrap_tool_call
 from langchain.tools.tool_node import ToolCallRequest
 from langchain_core.messages import ToolMessage
 from langgraph.runtime import Runtime
 from langgraph.types import Command
 
 from src.log.logger import logger
-from src.utils.prompt_loader import load_report_prompts, load_system_prompts
 
 
 MAX_MODEL_CALLS_PER_TURN = 3
@@ -56,9 +55,6 @@ def monitor_tool(
         result = handler(request)
         logger.info("[tool monitor] tool=%s succeeded", tool_name)
 
-        if tool_name == "fill_context_for_report":
-            request.runtime.context["report"] = True
-
         return result
     except Exception as exc:
         logger.error("[tool monitor] tool=%s failed: %s", tool_name, exc)
@@ -85,13 +81,6 @@ def log_before_model(state: AgentState, runtime: Runtime):
         content = getattr(latest_message, "content", "")
         logger.debug("[log_before_model] %s | %s", type(latest_message).__name__, str(content).strip())
     return None
-
-
-@dynamic_prompt
-def report_prompt_switch(request: ModelRequest):
-    if request.runtime.context.get("report", False):
-        return load_report_prompts()
-    return load_system_prompts()
 
 
 def _tool_key(tool_name: str, tool_args: dict) -> str:

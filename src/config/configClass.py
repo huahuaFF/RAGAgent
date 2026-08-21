@@ -83,7 +83,6 @@ class VectorStoreServiceInfo:
 class PromptInfo:
     main_prompt_path: str
     rag_prompt_path: str
-    report_prompt_path: str
 
 
 @dataclass
@@ -131,7 +130,6 @@ class Configer:
         return PromptInfo(
             main_prompt_path=_getenv("main_prompt_path", "prompts/main_prompt.txt"),
             rag_prompt_path=_getenv("rag_summarize_prompt_path", _getenv("rag_prompt_path", "prompts/rag.txt")),
-            report_prompt_path=_getenv("report_prompt_path", "prompts/report_prompt.txt"),
         )
 
     def loadAgentInfo(self) -> AgentInfo:

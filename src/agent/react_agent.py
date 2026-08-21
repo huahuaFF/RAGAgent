@@ -9,7 +9,7 @@ from src.agent.tools.arxiv_tool import (
     arxiv_search,
     import_paper_to_vector_store,
 )
-from src.agent.tools.middleware import log_before_model, monitor_tool, report_prompt_switch
+from src.agent.tools.middleware import log_before_model, monitor_tool
 from src.agent.tools.rag_tool import rag_summarize
 from src.agent.tools.web_search_tool import web_search
 from src.model.chatModel import chatModel
@@ -29,7 +29,7 @@ class MainAgent:
                 import_paper_to_vector_store,
                 web_search,
             ],
-            middleware=[monitor_tool, log_before_model, report_prompt_switch],
+            middleware=[monitor_tool, log_before_model],
             system_prompt=load_system_prompts(),
             checkpointer=self.checkpointer,
         )
@@ -38,7 +38,6 @@ class MainAgent:
         result = self.agent.invoke(
             {"messages": [{"role": "user", "content": query}]},
             config=self._config(session_id),
-            context={"report": False},
         )
         latest_message = result["messages"][-1]
         return str(getattr(latest_message, "content", "")).strip()
